@@ -1,0 +1,117 @@
+@font-face {
+	font-family: "iconfont";
+  src: url('./source/iconfont.ttf') format('truetype');
+}
+
+$iconS: 30upx;
+.v-icon {
+  font-family: "iconfont" !important;
+  font-size: $iconS;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+	flex: none;
+	display: flex;
+	width: $iconS;
+	height: $iconS;
+	text-align: center;
+	algin-items: center;
+	color: #BBB;
+}
+
+.v-icon-female:before {
+  content: "\e71a";
+}
+
+.v-icon-male:before {
+  content: "\e71c";
+}
+
+.v-icon-eye:before {
+  content: "\eab4";
+}
+
+.v-icon-arrow-right:before {
+  content: "\e602";
+}
+
+.v-icon-friends-circle-circle-filled:before {
+  content: "\e669";
+}
+
+.v-icon-img-simple:before {
+  content: "\e6b5";
+}
+
+.v-icon-wechat-circle-filled:before {
+  content: "\e65b";
+}
+
+.v-icon-clear:before {
+  content: "\e6e1";
+}
+
+.v-icon-more:before {
+  content: "\e63c";
+}
+
+.v-icon-unlock:before {
+  content: "\e69f";
+}
+
+.v-icon-phone:before {
+  content: "\e636";
+}
+
+.v-icon-lock:before {
+  content: "\e62f";
+}
+
+.v-icon-info:before {
+  content: "\e9de";
+}
+
+.v-icon-video:before {
+  content: "\eaba";
+}
+
+.v-icon-bell-filled:before {
+  content: "\e6f2";
+}
+
+.v-icon-user-round:before {
+  content: "\e638";
+}
+
+.v-icon-user:before {
+  content: "\e630";
+}
+
+.v-icon-id:before {
+  content: "\e66f";
+}
+
+.v-icon-app:before {
+  content: "\e63e";
+}
+
+.v-icon-monitor:before {
+  content: "\e620";
+}
+
+.v-icon-eye-close:before {
+  content: "\e604";
+}
+
+.v-icon-version:before {
+  content: "\e712";
+}
+
+.v-icon-monitor-filled:before {
+  content: "\e609";
+}
+
+.v-icon-user-filled:before {
+  content: "\e601";
+}
+

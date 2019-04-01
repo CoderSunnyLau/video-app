@@ -1,0 +1,140 @@
+@import "./variable.scss";
+
+page, body, view{
+	font-size: $fontSize;
+	color: $color;
+}
+page, body{
+	background-color: #F4F4F4;
+}
+
+// 表单
+.form{
+	padding: 16upx 0;
+}
+// f-item form-item组件样式
+$formItemH: 110upx;
+.form-item{
+	display: flex;
+	flex-direction: row;
+	height: $formItemH;
+	align-items: center;
+	padding: 0 30upx;
+	background: #FFF;
+}
+.form-item-border{
+	border-bottom: $border;
+}
+.form-label{
+	width: 180upx;
+	box-sizing: border-box;
+	padding: 0 $padding;
+	flex: none;
+	font-size: $inputFontSize;
+	position: relative;
+}
+.form-label-required{
+	&::before{
+		content: "*";
+		color: #D00;
+		position: absolute;
+		margin-left: -16upx;
+	}
+}
+.form-btn{
+	padding: 75upx 40upx 0;
+}
+
+// v-input 组件样式
+.v-input{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+	flex: 1;
+	.v-input-input {
+		flex: 1;
+		line-height: $formItemH;
+	}
+	.v-icon{
+		flex: none;
+	}
+}
+
+// v-img组件样式
+.v-img{
+	width: 100%;
+	height: 420upx;
+}
+.no-img{
+	display: flex;
+	height: 350upx;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	background-color: #E0E0E0;
+}
+
+// 便捷样式
+.ellipsis{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.grey{
+	color: #AAA;
+}
+.red{
+	color: #D00;
+}
+
+// 覆盖原生样式
+.input-placeholder, .textarea-placeholder{
+	color: #BBB;
+	font-size: $inputFontSize;
+}
+input, textarea, .v-input{
+	color: $color;
+	font-size: $inputFontSize;
+}
+button{
+	font-size: 32upx;
+	border-radius: 0;
+	padding: 0 10upx;
+	background: none;
+	height: $buttonH;
+	color: $color;
+	line-height: $buttonH;
+	&::after{
+		border-radius: 0;
+	}
+	&[type=text]{
+		border: none;
+		background: none;
+		&::after{
+			border: none;
+		}
+	}
+	$buttonColor: #0096fa;
+	&[type=primary], &[loading][type=primary]{
+		color: #FFF;
+		background-color: $buttonColor;
+	}
+	&[type=default]{
+		color: $buttonColor;
+		border: 1px solid $buttonColor;
+		background: none;
+	}
+	&[loading]{
+		opacity: 0.8;
+	}
+}
+.navigator-hover.nav-text{
+	background: none;
+}
+scroll-view{
+	box-sizing: border-box;
+}
+radio, .radio{
+	transform: scale(0.75);
+}

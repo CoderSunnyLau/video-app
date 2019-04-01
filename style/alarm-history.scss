@@ -1,0 +1,30 @@
+$margin: 34upx;
+.alarm-history{
+	.form-history{
+		margin: $margin;
+		overflow: hidden;
+		border: 1px solid #DDD;
+		$fitemH: 74upx;
+		.form-item{
+			height: $fitemH;
+			.v-input{
+				margin-left: 66upx;
+			}
+		}
+	}
+	.btn-search{
+		margin: 0 $margin $margin;
+	}
+	.list{
+		border-top: 1px solid #DDD;
+		padding-top: $margin;
+		.img{
+			width: 100%;
+			height: 422upx;
+			margin: 10upx 0;
+		}
+		.no-img{
+			margin: 10upx 0;
+		}
+	}
+}
