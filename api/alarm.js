@@ -1,5 +1,5 @@
 import {post} from "@/common/api.request.js"
-import {pageSize} from "@/common/config.js"
+import {pageSize, baseRequestUrl} from "@/common/config.js"
 
 /**
  * @description 告警历史
@@ -33,5 +33,6 @@ const queryCenter = (data) => {
 
 export default {
 	history,
-	queryCenter
+	queryCenter,
+	getPicUrl: baseRequestUrl + "file/getPic"
 }

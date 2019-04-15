@@ -16,19 +16,21 @@
 				<alarm-info :chain="dt.chain" :height="swiperH"></alarm-info>
 			</swiper-item>
 			<swiper-item>
-				<alarm-history ref="alarmHistory" :eq-id="eq_id" :height="swiperH" @show-picker="showPicker"></alarm-history>
+				<scroll-view scroll-y :style="{height: swiperH}" @scrolltolower="historyLoadMore">
+					<alarm-history ref="alarmHistory" :eq-id="eq_id" @show-picker="showPicker" @show-share="showShareFn" @url-change="setTempUrl"></alarm-history>
+				</scroll-view>
 			</swiper-item>
 			<swiper-item>
 				<scroll-view class="project-info" scroll-y :style="{height: swiperH}">
 					<!-- <text>项目名称：{{dt.project_name}}</text> -->
-					<!-- <v-img src="http://igiweb.gzyaorui.cn/images/img-solution-03.b14d768.jpg"></v-img> -->
-					<v-img :src="dt.src" title="项目平面图加载失败"></v-img>
+					<v-img :src="dt.src" title="项目平面图加载失败" @click="preview(dt.src)"></v-img>
 					<!-- <text>{{dt.src}}</text> -->
 				</scroll-view>
 			</swiper-item>
 		</swiper>
 		<picker-date-pop v-model="showStart" title="开始时间" mode="dateTime" @change="dateChange($event, 'startTime')"></picker-date-pop>
 		<picker-date-pop v-model="showEnd" title="结束时间" mode="dateTime" @change="dateChange($event, 'endTime')"></picker-date-pop>
+		<v-share v-model="showShare" :imgUrl="tempUrl"></v-share>
 	</view>
 </template>
 
@@ -38,9 +40,7 @@
 	import pickerDatePop from "@/components/form/picker-date/picker-date-pop.vue"
 	import alarmInfo from "./components/alarm-info.vue"
 	import alarmHistory from "./components/alarm-history.vue"
-	import {baseRequestUrl} from "@/common/config.js"
-	
-	const baseImgUrl = baseRequestUrl + "file/getDeviceFile?fileId=";
+	import vShare from "@/components/v-share/v-share.vue"
 	
 	export default {
 		name: "deviceDetail",
@@ -58,7 +58,9 @@
 				showStart: false,
 				showEnd: false,
 				videoH: 230,
-				windowH: 603
+				windowH: 603,
+				showShare: false,
+				tempUrl: ""
 			}
 		},
 		computed: {
@@ -69,7 +71,7 @@
 				return `${(this.windowH - this.videoH - (92 * this.px) - 1)}px`;
 			}
 		},
-		components: {alarmInfo, alarmHistory, pickerDatePop},
+		components: {alarmInfo, alarmHistory, pickerDatePop, vShare},
 		onLoad(options){
 			let eq_id = options.eq_id;
 			if(eq_id){
@@ -95,7 +97,7 @@
 				let _this = this;
 				api.detail(this.eq_id).then(res => {
 					let dt = res.data;
-					dt.src = baseImgUrl + dt.project_url;
+					dt.src = api.getDeviceFileUrl + dt.project_url;
 					_this.dt = dt;
 					let eq_name = dt.eq_name;
 					if(eq_name){
@@ -122,6 +124,23 @@
 				if(el){
 					el.dateChange(e, time);
 				}
+			},
+			historyLoadMore(){
+				this.$refs.alarmHistory.loadMore();
+			},
+			showShareFn(val){
+				this.showShare = val;
+				console.log("val", val);
+			},
+			setTempUrl(val){
+				console.log("urlChagne", val);
+				this.tempUrl = val;
+			},
+			preview(url){
+				uni.previewImage({
+					urls: [url],
+					current: url
+				});
 			}
 		}
 	}

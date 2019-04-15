@@ -97,7 +97,7 @@
 			loginSuccess(){
 				ut.showToast("登录成功");
 				uni.reLaunch({
-					url: this.$page.device
+					url: this.$page.index
 				});
 			},
 			formSubmit(){

@@ -4,7 +4,7 @@
 	
 	export default {
 		methods: {
-			...mapMutations(["setPx"])
+			...mapMutations(["setPx", "setDownloadUrl", "setVersion"])
 		},
 		onLaunch: function() {
 			console.log("App Launch");
@@ -41,14 +41,15 @@
 			this.setPx(px);  //设置upx和px的比。
 			//#ifdef APP-PLUS  
 				// App检查更新
-				var info = plus.push.getClientInfo(); 
+				// var info = plus.push.getClientInfo(); 
 				console.log( "获取客户端推送标识信息：(个推需要保存的)" );  
-				console.log(JSON.stringify(info));
+				// console.log(JSON.stringify(info));
 				 
 				var APPLICATION_ID = "1001";
 				plus.screen.lockOrientation("portrait-primary"); //锁定
 				plus.runtime.getProperty(plus.runtime.appid, (res) => {
-					
+					console.log("getProperty res:" + JSON.stringify(res));
+					this.setVersion(res.version);
 					// 检测升级
 					common.checkVersion({
 						appid: plus.runtime.appid,
@@ -58,17 +59,22 @@
 						PLAT_FORM: platform
 					}).then(res => {
 						console.log("check Version res：" + JSON.stringify(res));
+						let url = "";
+						if(res.updateInfo && res.updateInfo.URL){
+							url = res.updateInfo.URL;
+							this.setDownloadUrl(url);
+						}
 						if(res.IS_NEED_UPDATE==1){
 							console.log("需要更新");
-							let openUrl = res.updateInfo.URL;
 							let IS_ENFORCE=res.updateInfo.IS_ENFORCE;
 							// 提醒用户更新
 							uni.showModal({
 								title: "更新提示",
-								content: res.updateInfo.NOTE ? res.updateInfo.NOTE : "是否选择更新",
+								content: res.updateInfo.NOTE ? res.updateInfo.NOTE : "前往更新",
+								showCancel: !IS_ENFORCE,
 								success: (showResult) => {
 									if (showResult.confirm) {
-										plus.runtime.openURL(openUrl);
+										plus.runtime.openURL(url);
 									}
 								}
 							});

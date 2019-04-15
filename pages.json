@@ -49,6 +49,7 @@
             "path" : "pages/device/add-device",
             "style" : {
                 "navigationBarTitleText" : "添加设备",
+				"enablePullDownRefresh": true,
 				"app-plus": {
 					"titleNView": {
 				        "buttons": [
@@ -138,6 +139,44 @@
 				"enablePullDownRefresh": true
             }
         }
+        ,{
+			"name": "index",
+            "path" : "pages/index/index",
+            "style" : {
+                "navigationBarTitleText" : "首页",
+				"navigationBarBackgroundColor": "#1c85ea"
+			}
+        }
+        ,{
+			"name" : "board",
+            "path" : "pages/board/board",
+            "style" : {
+                "navigationBarTitleText" : "今日看板",
+				"enablePullDownRefresh": true
+			}
+        }
+        ,{
+			"name" : "boardDetail",
+            "path" : "pages/board/board-detail",
+            "style" : {
+                "navigationBarTitleText" : "看板详情"
+			}
+        }
+        ,{
+			"name": "traffic",
+            "path" : "pages/traffic/traffic",
+            "style" : {
+                "navigationBarTitleText" : "智能通行"
+			}
+        }
+        ,{
+			"name": "environment",
+            "path" : "pages/environment/environment",
+            "style" : {
+				"navigationBarTitleText": "环境监测",
+				"enablePullDownRefresh": true
+			}
+        }
     ],
     "tabBar" : {
         "color" : "#7a7e83",
@@ -145,10 +184,10 @@
         "backgroundColor" : "#ffffff",
         "list" : [
             {
-                "pagePath" : "pages/device/device",
-                "text" : "我的设备",
-                "iconPath" : "static/tabbar/device.png",
-                "selectedIconPath" : "static/tabbar/device-curr.png"
+                "pagePath" : "pages/index/index",
+                "text" : "首页",
+                "iconPath" : "static/tabbar/index.png",
+                "selectedIconPath" : "static/tabbar/index-curr.png"
             },
             {
                 "pagePath" : "pages/alarm/alarm",
@@ -177,6 +216,11 @@
 	        {
 	            "name" : "登录",
 	            "path" : "pages/basic/login",
+	            "query" : ""
+	        },
+	        {
+	            "name" : "首页",
+	            "path" : "pages/index/index",
 	            "query" : ""
 	        },
 	        {
@@ -233,6 +277,18 @@
 	            "name" : "告警详情",
 	            "path" : "pages/alarm/alarm-detail",
 	            "query" : "eq_id=1"
+			},
+			{
+				"name":"智能通行",
+				"path":"pages/traffic/traffic"
+			},
+			{
+				"name":"环境监测",
+				"path":"pages/environment/environment"
+			},
+			{
+				"name":"今日看板",
+				"path":"pages/board/board"
 			}
 		]
 	}

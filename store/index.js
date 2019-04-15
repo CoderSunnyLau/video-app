@@ -9,7 +9,9 @@ const store = new Vuex.Store({
 		userName: "",
 		deviceList: [],
 		px: 0.5,
-		NAME: ""
+		NAME: "",
+		downloadUrl: "https://",
+		version: "1.0.0"
 	},
 	mutations: {
 		updateDeviceList(state, list){
@@ -20,6 +22,12 @@ const store = new Vuex.Store({
 		},
 		setName(state, NAME){
 			state.NAME = NAME;
+		},
+		setDownloadUrl(state, url){
+			state.downloadUrl = url;
+		},
+		setVersion(state, version){
+			state.version = version;
 		}
 	},
 	actions: {

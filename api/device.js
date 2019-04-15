@@ -1,16 +1,14 @@
 import {post} from "@/common/api.request.js"
-import {pageSize} from "@/common/config.js"
+import {pageSize, baseRequestUrl} from "@/common/config.js"
 
 /**
  * @description 添加设备保存
- * @param  eq_id  必传  String  32byte  所选择的的设备ID
- * @param  chain_password  必传  String  100byte  密码
- * @param  chain_name  非必传  String  100yte  用户ID
+ * @param  eq_id  必传  String  32byte  所选择的以逗号连接的的设备ID字符串
  */
-const save = (data) => {
+const save = eq_id => {
 	return post({
 		url: "device/save",
-		data
+		data: {eq_id}
 	});
 }
 
@@ -43,6 +41,15 @@ const formerQuery = (data) => {
 const query = () => {
 	return post({
 		url: "device/pcQuery"
+	});
+}
+
+/**
+ * @description 添加设备时查询可供添加的设备列表
+ */
+const queryAll = () => {
+	return post({
+		url: "device/pcSimpleQuery"
 	});
 }
 
@@ -85,13 +92,15 @@ const history = data => {
 	});
 }
 
-
 export default {
 	save,
 	getByChain,
 	formerQuery,
 	query,
+	queryAll,
 	detail,
 	del,
-	history
+	history,
+	getPicUrl: baseRequestUrl + "file/getPic",
+	getDeviceFileUrl: baseRequestUrl + "file/getDeviceFile?fileId="
 }

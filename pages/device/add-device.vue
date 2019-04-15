@@ -1,112 +1,109 @@
 <template>
-	<view class="add-device">
-		<view class="form">
-			<f-item label="云ID">
-				<v-input v-model="formData.chain" placeholder="请输入云ID" @input="chainInput"></v-input>
-			</f-item>
-			<f-item label="设备名称">
-				<input v-model="formData.eq_name" :placeholder="chainLoading ? '加载中，请稍候' : '暂无设备'" disabled />
-			</f-item>
-			<f-item label="用户名">
-				<v-input v-model="formData.chain_name" placeholder="请输入用户名"></v-input>
-			</f-item>
-			<f-item label="设备密码">
-				<v-input v-model="formData.chain_password" placeholder="请输入设备密码" type="password"></v-input>
-			</f-item>
-			<!-- #ifndef APP-PLUS -->
-				<view class="form-btn"><button type="primary" @click="formSubmit">完成</button></view>
-			<!-- #endif -->
+	<view class="add-device device form">
+		<view v-if="queryLoading !== 0"><v-loading :state="queryLoading"></v-loading></view>
+		<view class="no-text grey" v-else-if="!list.length">暂无相关设备。</view>
+		<view class="pro-ul" v-for="(pro, pIdx) in list" v-if="pro.children.length" :key="pIdx">
+			<text class="pro-name">项目：{{pro.name}}</text>
+			<block v-for="(item, cIdx) in pro.children" :key="cIdx">
+				<device-item :item="item" :type="item.type" selection @change="selChange"></device-item>
+			</block>
 		</view>
+		<!-- #ifndef APP-PLUS -->
+			<view class="form-btn" v-if="list.length"><button type="primary" @click="save">保存</button></view>
+		<!-- #endif -->
 	</view>
 </template>
 
 <script>
+	import deviceItem from "./components/device-item.vue"
+	import vLoading from "@/components/v-loading/v-loading.vue"
 	import api from "@/api/device.js"
-	import validate from "@/common/validate.js"
 	import ut from "@/common/utils.js"
-	let getSimpleTemp = 0;
 	export default {
 		name: "addDevice",
 		data() {
 			return {
-				formData: {
-					eq_id: "",
-					chain_password: "",
-					chain_name: "",
-					chain: "",
-					eq_name: ""
-				},
-				chainLoading: false,
-				rules: {
-					chain: {required: true, message: "请输入云ID"},
-					eq_id: {required: true, message: "未查找到设备，请核对云ID是否正确"},
-					chain_name: [{required: true, message: "请输入用户名"}, {max: 50, message: "用户名长度不可超过50位"}],
-					chain_password: [{required: true, message: "请输入设备密码"}, {max: 20, message: "密码长度不可超过20位"}]
-				},
-				saveLoading: false
+				queryLoading: 0,  //0 初始状态，1 加载中，2 加载完毕，3 加载错误
+				saveLoading: false,
+				list: [],
+				selList: []  //已勾选的设备列表，每一项为id（eq_id）
 			};
 		},
+		components: {deviceItem, vLoading},
+		onLoad(){
+			this.query();
+		},
+		onPullDownRefresh(){
+			this.query(true);
+		},
 		onNavigationBarButtonTap(){
-			this.formSubmit();
+			this.save();
 		},
 		methods: {
+			query(refresh){
+				this.queryLoading = 1;
+				this.list = [];
+				this.selList = [];
+				this.$nextTick(() => {
+					api.queryAll().then(res => {
+						this.list = res.data;
+						this.queryLoading = 0;
+						{  //初始化已关注的设备列表
+							let list = [];
+							res.data.forEach(item => {
+								if(item.children.length){
+									item.children.forEach(child => {
+										if(child.selected === true){
+											list.push(child.id);
+										}
+									});
+								}
+							});
+							this.selList = [...list];
+						}
+						uni.stopPullDownRefresh();
+						if(refresh){
+							ut.showToast("刷新成功", "success");
+						}
+					}).catch(err => {
+						console.log("err", err);
+						this.queryLoading = 3;
+						uni.stopPullDownRefresh();
+					});
+				});
+			},
 			save(){
-				let fd = {...this.formData};
-				let reqData = {
-					eq_id: fd.eq_id,
-					chain_password: fd.chain_password,
-					chain_name: fd.chain_name
-				};
-				ut.showLoading("正在添加设备");
-				api.save(reqData).then(res => {
+				let str = this.selList.join(",");
+				if(!str){
+					ut.showToast("请选择至少一个设备");
+					return;
+				}
+				ut.showLoading("正在提交");
+				api.save(str).then(res => {
 					console.log("save res:", res);
 					ut.showToast(res.msg, "success");
 					this.$store.dispatch("updateDeviceList");  // 添加成功，更新一下设备列表
 					setTimeout(uni.navigateBack, 1000);
 				}).catch();
 			},
-			chainInput(e){
-				clearTimeout(getSimpleTemp);
-				getSimpleTemp = setTimeout(() => {
-					this.getDeviceSimple();
-				}, 500);
-			},
-			getDeviceSimple(){  //根据chain 云ID来获取设备名称等信息
-				this.formData.eq_id = "";
-				this.formData.eq_name = "";
-				if(this.formData.chain){
-					this.chainLoading = true;
-					api.getByChain(this.formData.chain).then(res => {
-						console.log("get res", res);
-						if(res.data && res.data.eq_id){
-							let dt = res.data;
-							this.formData.eq_id = dt.eq_id;
-							this.formData.eq_name = dt.eq_name || "未命名设备";
-						}
-						this.chainLoading = false;
-					}).catch(err => {
-						this.chainLoading = false;
-					});
+			selChange(id, val){
+				let list = [...this.selList];
+				let index = list.indexOf(id);
+				if(val === true){
+					if(!~index){
+						list.push(id);
+					}
+				}else if(val === false){
+					if(!!~index){
+						list.splice(index, 1);
+					}
 				}
-			},
-			formValidate(){
-				return validate(this.formData, this.rules);
-			},
-			formSubmit(){
-				let valid = this.formValidate();
-				if(valid){
-					this.save();
-				}
+				this.selList = [...list];
 			}
 		}
 	}
 </script>
 
 <style lang="scss">
-	.add-device{
-		overflow: hidden;
-		.form{
-			overflow: hidden;
-		}
-	}
+	@import "./components/device.scss";
 </style>

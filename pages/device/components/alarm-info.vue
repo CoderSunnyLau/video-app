@@ -2,7 +2,6 @@
 	<scroll-view class="alarm-info" scroll-y :style="{height: height}">
 		<block v-if="imgList.length">
 			<view>
-				<!-- <image class="img" v-for="(item, index) in 5" :key="index" src="http://igiweb.gzyaorui.cn/images/img-solution-03.b14d768.jpg" mode="aspectFit" @click="preview(index)"></image> -->
 				<image v-for="(item, index) in imgList" :key="index" :src="item" mode="aspectFit" @click="preview(index)"></image>
 			</view>
 			<text class="no-alarm">暂无更多</text>

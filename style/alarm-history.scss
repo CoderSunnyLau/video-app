@@ -27,4 +27,20 @@ $margin: 34upx;
 			margin: 10upx 0;
 		}
 	}
+	.share-tips{
+		text-align: center;
+		margin-bottom: 20upx;
+		color: #888;
+	}
+	.canvas-wrap{
+		width: 750px;
+		height: 0;
+		overflow: hidden;
+		.canvas-el{
+			visibility: hidden;
+			width: 750px;
+			height: 1465px;
+			margin: 0;
+		}
+	}
 }

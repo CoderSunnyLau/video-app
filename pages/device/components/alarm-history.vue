@@ -1,5 +1,5 @@
 <template>
-	<scroll-view class="alarm-history" scroll-y :style="{height: height}" @scrolltolower="loadMore">
+	<view class="alarm-history">
 		<form>
 			<view class="form-history">
 				<view class="form-item form-item-border">
@@ -20,22 +20,31 @@
 			<button class="btn-search" type="primary" @click="history(true)">查询</button>
 		</form>
 		<view class="list">
+			<view v-if="historyList.length" class="share-tips">长按图片即可分享</view>
 			<block v-for="(item, index) in historyList" :key="index">
-				<!-- <v-img title="图片获取失败" :src="item.thumbnail_url || item.file_url" @click="preview(item.file_url || item.thumbnail_url)"></v-img> -->
-				<v-img :src="item.thumbUrl" @click="preview(item.sourceUrl)"></v-img>
+				<v-img :src="item.thumbUrl" @click="preview(item.sourceUrl)" @longpress="beforeShare(item.thumbUrl)"></v-img>
 			</block>
 		</view>
 		<v-loading :state="loadingState"></v-loading>
-	</scroll-view>
+		<view class="canvas-wrap">
+			<!-- <image :src="imgUrlTemp" mode="aspectFit"></image> -->
+			<canvas canvas-id="canvasShare" class="canvas-el"></canvas>
+		</view>
+	</view>
 </template>
 
 <script>
 	import api from "@/api/device.js"
 	import vLoading from "@/components/v-loading/v-loading.vue"
 	import ut from "@/common/utils.js"
-	import {basePicUrl} from "@/common/config.js"
+	import QR from "@/common/qrcode.js" // 二维码生成器  
 	
 	let imgList = [];
+	let ctx = null;
+// 	let cw = 1024;
+// 	let ch = 2000;
+	let cw = 750;
+	let ch = 1465;
 	
 	export default {
 		name: "alarmHistory",
@@ -49,17 +58,14 @@
 					pageNumber: 1
 				},
 				firstLoad: true,
-				loadingState: 0
+				loadingState: 0,
+				imgUrlTemp: ""
 			}
 		},
 		props: {
 			eqId: {
 				type: String,
 				default: ""
-			},
-			height: {
-				type: String,
-				default: "330px"
 			}
 		},
 		components: {vLoading},
@@ -67,6 +73,12 @@
 			eqIdTemp(){
 				if(this.firstLoad) this.history();
 				return this.eqId;
+			},
+			downloadUrl(){
+				return this.$store.state.downloadUrl;
+			},
+			px(){
+				return this.$store.state.px;
 			}
 		},
 		watch: {
@@ -82,18 +94,23 @@
 				deep: true
 			}
 		},
+		mounted(){
+			ctx = uni.createCanvasContext("canvasShare", this);
+			this.initQRcode();
+		},
 		methods: {
-			history(refresh){
+			history(refresh, callback){
 				this.loadingState = 1;
 				if(refresh === true){
 					this.fd.pageNumber = 1;
+					this.historyList = [];
 				}
-				ut.showLoading();
+				// ut.showLoading();
 				this.fd.eq_id = this.eqId;
 				api.history(this.fd).then(res => {
 					let dt = res.data;
 					dt.list.map(item => {
-						let tempUrl = `${basePicUrl}?img=${item.alarm_img_name}&chain=${item.chain}&type=`;
+						let tempUrl = `${api.getPicUrl}?img=${item.alarm_img_name}&chain=${item.chain}&type=`;
 						item.sourceUrl = tempUrl + "source";
 						item.thumbUrl = tempUrl + "thumbnail";
 					});
@@ -101,11 +118,13 @@
 					this.fd.pageNumber = dt.pageNumber;
 					this.firstLoad = false;
 					this.loadingState = dt.lastPage ? 2 : 0;
-					uni.hideLoading();
+					// uni.hideLoading();
+					if(typeof callback === "function") callback(true);
 				}).catch(err => {
 					console.log("err", err);
 					this.historyList = [];
 					this.loadingState = 3;
+					if(typeof callback === "function") callback(false);
 				});
 			},
 			loadMore(){
@@ -123,6 +142,82 @@
 					urls: imgList,
 					current: url
 				});
+			},
+			initQRcode(){
+				this.QRcode = QR.createQrCodeImg(this.downloadUrl, {  
+					size: parseInt(300)//二维码大小  
+				});
+				// this.beforeShare("http://ais.igiai.com/app/file/getPic?img=74b8677a60d843938c5be176b853eaa3.jpg&chain=1674162283&type=thumbnail");
+			},
+			beforeShare(url){
+				this.$emit("show-share", true);
+				uni.getImageInfo({
+					src: url,
+					success: (image) => {
+						console.log(image);
+						console.log(image.height);
+						this.draw(image);
+					}
+				});
+			},
+			draw(image){
+				let side = cw/35;  //边距
+				// 先清除画布
+				ctx.clearRect(0, 0, cw, ch);
+				ctx.save();
+				// 白色背景
+				ctx.beginPath();
+				ctx.fillStyle = "#FFF";
+				ctx.fillRect(0, 0, cw, ch);
+				//画背景图片
+				let bgUrl = image.path;
+				let bgH = (cw / image.width) * image.height;
+				ctx.beginPath();
+				ctx.drawImage(bgUrl, 0, 0, cw, bgH);
+				// 绘制二维码
+				let qrcodeS = parseInt(cw / 7);
+				let qrcodeX = side*2;
+				let qrcodeY = bgH + side;
+				let qrcodeUrl = this.QRcode;
+				ctx.drawImage(qrcodeUrl, qrcodeX, qrcodeY, qrcodeS, qrcodeS);
+				// 绘制文字
+				let textX = qrcodeS + qrcodeX + side*2;
+				ctx.setFontSize(cw/40);
+				ctx.fillStyle = "#000";
+				ctx.fillText("扫描或长按识别图中二维码下载App", textX, qrcodeY + side*3);
+				ctx.fillText("可查看更多设备告警详情", textX, qrcodeY + side*3.5 + side);
+				
+				ctx.restore();
+				// ctx.draw(true);
+				setTimeout(() => {
+					let _this = this;
+					let imgH = qrcodeY + qrcodeS + side;
+					console.log("imgH", bgH, qrcodeY, qrcodeS, side, imgH);
+					ctx.draw(true, () => {
+						console.log("drawn")
+						uni.canvasToTempFilePath({
+							canvasId: "canvasShare",
+							width: cw,
+							height: imgH,
+							success: (res) => {
+								console.log("res", res);
+								// _this.tempUrl = res.tempFilePath;
+								_this.$emit("url-change", res.tempFilePath);
+								_this.imgUrlTemp = res.tempFilePath;
+							},
+							complete: (res) => {
+								console.log("complete", res);
+							},
+							fail: (err) => {
+								let msg = "分享图片获取失败";
+								if(typeof err === "object"){
+									msg = JSON.stringify(err);
+								}
+								ut.showToast(msg);
+							}
+						}, this);
+					});
+				}, 300);
 			}
 		}
 	}

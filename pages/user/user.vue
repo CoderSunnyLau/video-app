@@ -32,7 +32,7 @@
 				<view class="row-label"><v-icon type="user-round"></v-icon><text>用户审批</text></view>
 				<v-icon type="arrow-right"></v-icon>
 			</navigator>
-			<view class="row" @click="showShare = true;">
+			<view class="row" @click="beforeShare">
 				<view class="row-label"><v-icon type="app"></v-icon><text>App分享</text></view>
 				<v-icon type="arrow-right"></v-icon>
 			</view>
@@ -42,18 +42,10 @@
 			</view>
 		</view>
 		<button class="btn-logout" @click="beforeLogout">退出登录</button>
-		<v-pop v-model="showShare" no-header>
-			<view class="share-box">
-				<view class="share-btn" @click="share('WXSceneSession')">
-					<v-icon type="wechat-circle-filled" color="#51C332" size="80"></v-icon>
-					<text>分享给好友</text>
-				</view>
-				<view class="share-btn" @click="share('WXSenceTimeline')">
-					<v-icon type="friends-circle-circle-filled" color="#4792d3" size="80"></v-icon>
-					<text>分享到朋友圈</text>
-				</view>
-			</view>
-		</v-pop>
+		<v-share v-model="showShare" :imgUrl="tempUrl"></v-share>
+		<view class="canvas-wrap">
+			<canvas canvas-id="canvasShare" class="canvas-el"></canvas>
+		</view>
 	</view>
 </template>
 
@@ -62,7 +54,10 @@
 	import api from "@/api/user.js"
 	import ut from "@/common/utils.js"
 	import common from "@/api/common.js"
-	import vPop from "@/components/modal/v-pop.vue"
+	import vShare from "@/components/v-share/v-share.vue"
+	import QR from "@/common/qrcode.js" // 二维码生成器  
+	
+	let ctx = null;
 
 	export default {
 		name: "user",
@@ -73,25 +68,36 @@
 				notifyLoading: false,
 				refreshNotify: true,
 				userName: "",
-				version: "v0.0.0",
-				showShare: false
+				showShare: false,
+				QRcode: "",
+				// ctx: {},
+				shareBg: "../../static/img/share.jpg",
+				tempUrl: ""
 			}
 		},
-		components: {vPop},
+		components: {vShare},
 		computed: {
 			page(){
 				return this.$page;
 			},
 			NAME(){
 				return this.$store.state.NAME;
+			},
+			version(){
+				return this.$store.state.version;
+			},
+			downloadUrl(){
+				return this.$store.state.downloadUrl;
+			},
+			px(){
+				return this.$store.state.px;
 			}
 		},
 		mounted(){
-			console.log("name", this.NAME)
+			ctx = uni.createCanvasContext("canvasShare", this);
+			// this.ctx = uni.createCanvasContext("canvasShare", this);  //不能这么写，App会报错。。。原因未知
 			this.init();
-			//#ifdef APP-PLUS
-				this.version = plus.runtime.version;
-			//#endif
+			this.draw();
 		},
 		methods: {
 			...mapMutations(["setName"]),
@@ -177,36 +183,66 @@
 					});
 				});
 			},
-			share(scene){
-// 				uni.showModal({
-// 					title: "提示",
-// 					content: "该功能暂未开放",
-// 					showCancel: false
-// 				});
-				this.showShare = false;
-				uni.share({
-					provider: "weixin",
-					scene,
-					type: 2,  //纯图片
-					title: "智能感知平台",
-					imageUrl: "../../static/img/share.jpg",
-					success: res => {
-						// ut.showToast("success:" + JSON.stringify(res));
-						ut.showToast("分享成功", "success");
-						console.log("success:" + JSON.stringify(res));
-					},
-					fail: err => {
-						let msg = err.errMsg;
-						if(msg){
-							msg = !~err.errMsg.indexOf("-2") ? err.errMsg : "已取消分享";
-						}else{
-							msg = JSON.stringify(err);
-						}
-						ut.showToast(msg);
-						// ut.showToast("分享失败");
-						console.log("fail:" + JSON.stringify(err));
-					}
+			draw(){
+				this.QRcode = QR.createQrCodeImg(this.downloadUrl, {  
+					size: parseInt(300)//二维码大小  
 				});
+				let px = this.px;
+				//画背景图片
+				let bgUrl = this.shareBg;
+				ctx.save();
+				ctx.beginPath();
+				ctx.drawImage(bgUrl, 0, 0, 750*px, 1334*px);
+				// 二维码
+				let qrcodeX = 250*px;
+				let qrcodeY = 700*px;
+				let qrcodeS = 250*px;
+				let qrcodeUrl = this.QRcode;
+				// 绘制二维码背景白底
+				ctx.beginPath();
+				ctx.fillStyle = "#FFF";
+				ctx.globalAlpha = 0.6;
+				ctx.fillRect(qrcodeX - 10*px, qrcodeY - 10*px, qrcodeS + 20*px, qrcodeS + 20*px);
+				// 绘制二维码
+				ctx.globalAlpha = 0.8;
+				ctx.drawImage(qrcodeUrl, qrcodeX, qrcodeY, qrcodeS, qrcodeS);
+				// 绘制二维码下方文字
+				ctx.globalAlpha = 1;
+				ctx.setFontSize(24*px);
+				ctx.fillStyle = "#FFF";
+				ctx.fillText("长按识别二维码下载App", qrcodeX - 10*px, qrcodeY + qrcodeS + 50*px);
+				
+				ctx.restore();
+				ctx.draw(true);
+			},
+			beforeShare(){
+				this.showShare = true;
+				if(!this.tempUrl){
+					let _this = this;
+					// let ctx = this.ctx;
+					setTimeout(() => {
+						ctx.draw(true, () => {
+							console.log("drawn")
+							uni.canvasToTempFilePath({
+								canvasId: "canvasShare",
+								success: (res) => {
+									console.log("res", res);
+									_this.tempUrl = res.tempFilePath;
+								},
+								complete: (res) => {
+									console.log("complete", res);
+								},
+								fail: (err) => {
+									let msg = "分享图片获取失败";
+									if(typeof err === "object"){
+										msg = JSON.stringify(err);
+									}
+									ut.showToast(msg);
+								}
+							}, this);
+						});
+					}, 100);
+				}
 			}
 		}
 	}
@@ -293,25 +329,15 @@
 			color: #D00;
 			margin: 30upx 0 20upx;
 		}
-		.v-pop{
-			.box{
-				height: 180upx;
-			}
-			.share-box{
-				height: 180upx;
-				display: flex;
-				align-items: center;
-				justify-content: space-around;
-			}
-			.share-btn{
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				font-size: 24upx;
-				color: #999;
-				.v-icon{
-					margin-bottom: 10upx;
-				}
+		.canvas-wrap{
+			width: 750upx;
+			height: 0;
+			overflow: hidden;
+			.canvas-el{
+				visibility: hidden;
+				width: 750upx;
+				height: 1334upx;
+				margin: 0;
 			}
 		}
 	}

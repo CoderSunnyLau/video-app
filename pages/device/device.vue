@@ -60,17 +60,21 @@
 			...mapActions(["updateDeviceList"]),
 			query(callback){
 				this.updateDeviceList().then(res => {
-					this.queryLoading = 0;
+					this.$nextTick(() => {
+						this.queryLoading = 0;
+					});
 					uni.stopPullDownRefresh();
 					if(typeof callback === "function") callback();
 				}).catch(err => {
-					this.queryLoading = 0;
+					this.queryLoading = 3;
 					uni.stopPullDownRefresh();
 				});
 			},
 			load(){  //会有转圈圈和文字提示
 				this.queryLoading = 1;
-				this.query();
+				this.$nextTick(() => {
+					this.query();
+				});
 			},
 			del(eq_id){
 				if(eq_id){
@@ -106,71 +110,5 @@
 </script>
 
 <style lang="scss">
-	page{
-		background-color:#FFF;
-	}
-	$margin: 26upx;
-	.device{
-		background-color: #FFF;
-		.pro-ul{
-			overflow: hidden;
-			margin-top: $margin;
-			.nvr-wrapper{
-				margin: $margin;
-				background-color: #F2F2F2;
-				overflow: hidden;
-				.nvr{
-					margin: 0;
-				}
-				.channel{
-					margin: 0;
-					padding-left: 80upx;
-					border-top: 1px solid #DDD;
-				}
-			}
-			.pro-name{
-				margin-left: $margin;
-				color: #999;
-			}
-			.device-li{
-				display: flex;
-				justify-content: space-between;
-				padding: 0 36upx;
-				background-color: #f2f2f2;
-				margin: $margin;
-				align-items: center;
-				.info{
-					line-height: 60upx;
-					width: 448upx;
-					.text{
-						display: flex;
-						.v-icon{
-							margin: 0 20upx 0 6upx;
-						}
-					}
-					.line{
-						height: 0;
-						border-bottom: 1px solid #DDD;
-						width: 100%;
-					}
-				}
-				.option{
-					$buttonH: 50upx;
-					button{
-						width: 137upx;
-						height: $buttonH;
-						line-height: $buttonH;
-						font-size: 24upx;
-						margin: 20upx 0;
-					}
-				}
-			}
-			.btn-trigger{
-				color: #555;
-			}
-		}
-		.no-text{
-			padding: 40upx;
-		}
-	}
+	@import "./components/device.scss";
 </style>

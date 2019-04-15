@@ -16,15 +16,8 @@ $iconS: 30upx;
 	height: $iconS;
 	text-align: center;
 	algin-items: center;
+	justify-content: center;
 	color: #BBB;
-}
-
-.v-icon-female:before {
-  content: "\e71a";
-}
-
-.v-icon-male:before {
-  content: "\e71c";
 }
 
 .v-icon-eye:before {
@@ -35,6 +28,10 @@ $iconS: 30upx;
   content: "\e602";
 }
 
+.v-icon-home-filled:before {
+  content: "\e600";
+}
+
 .v-icon-friends-circle-circle-filled:before {
   content: "\e669";
 }
@@ -43,8 +40,16 @@ $iconS: 30upx;
   content: "\e6b5";
 }
 
+.v-icon-delete:before {
+  content: "\e60d";
+}
+
 .v-icon-wechat-circle-filled:before {
   content: "\e65b";
+}
+
+.v-icon-battery:before {
+  content: "\e60b";
 }
 
 .v-icon-clear:before {
@@ -71,6 +76,18 @@ $iconS: 30upx;
   content: "\e9de";
 }
 
+.v-icon-plus-circle:before {
+  content: "\e607";
+}
+
+.v-icon-humidity:before {
+  content: "\e608";
+}
+
+.v-icon-edit:before {
+  content: "\e66a";
+}
+
 .v-icon-video:before {
   content: "\eaba";
 }
@@ -79,8 +96,20 @@ $iconS: 30upx;
   content: "\e6f2";
 }
 
+.v-icon-thermometer:before {
+  content: "\e62b";
+}
+
 .v-icon-user-round:before {
   content: "\e638";
+}
+
+.v-icon-monitor3:before {
+  content: "\e7cb";
+}
+
+.v-icon-angle:before {
+  content: "\e6a4";
 }
 
 .v-icon-user:before {
@@ -99,8 +128,28 @@ $iconS: 30upx;
   content: "\e620";
 }
 
+.v-icon-monitor-round:before {
+  content: "\e603";
+}
+
+.v-icon-person-round:before {
+  content: "\e606";
+}
+
+.v-icon-loading:before {
+  content: "\e962";
+}
+
 .v-icon-eye-close:before {
   content: "\e604";
+}
+
+.v-icon-pm:before {
+  content: "\e627";
+}
+
+.v-icon-wind:before {
+  content: "\e60c";
 }
 
 .v-icon-version:before {
@@ -111,7 +160,23 @@ $iconS: 30upx;
   content: "\e609";
 }
 
+.v-icon-tick-shield:before {
+  content: "\e60a";
+}
+
 .v-icon-user-filled:before {
   content: "\e601";
+}
+
+.v-icon-car:before {
+  content: "\e643";
+}
+
+.v-icon-monitor2:before {
+  content: "\e605";
+}
+
+.v-icon-cross-shield:before {
+  content: "\e60f";
 }
 
